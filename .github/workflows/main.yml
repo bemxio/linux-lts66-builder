@@ -25,6 +25,9 @@ jobs:
             LAST_BUILT_VERSION=$(cat linux-lts66-builder/last_built_version.txt)
           fi
 
+          echo $CURRENT_VERSION
+          echo $LAST_BUILT_VERSION
+
           if [[ "$CURRENT_VERSION" == "$LAST_BUILT_VERSION" ]]; then
             exit 0
           fi
