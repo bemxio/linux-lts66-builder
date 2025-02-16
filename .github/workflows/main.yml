@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  main:
     runs-on: ubuntu-latest
     container: archlinux:latest
 
@@ -36,6 +36,8 @@ jobs:
 
       - name: Build the kernel
         run: |
+          ls -a
+          pwd
           cd linux-lts66
           sudo chown -R nobody .
           sudo -u nobody makepkg -s --noconfirm
