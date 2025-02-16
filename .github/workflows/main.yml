@@ -1,0 +1,59 @@
+name: Build new Linux 6.6 LTS release
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+
+    steps:
+      - name: Install dependencies and clone AUR package base
+        run: |
+          pacman -Syu --noconfirm base-devel git
+          git clone https://aur.archlinux.org/linux-lts66.git
+
+      - name: Extract package version
+        run: |
+          cd linux-lts66
+          echo "VERSION=$(grep '^pkgver=' PKGBUILD | cut -d'=' -f2)" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check if version build exists
+        run: |
+          if [[ -f last_built_version.txt ]]; then
+            LAST_BUILT_VERSION=$(cat last_built_version.txt)
+          fi
+
+          if [[ "$VERSION" == "$LAST_BUILT_VERSION" ]]; then
+            exit 0
+          fi
+
+      - name: Build the kernel
+        run: |
+          cd linux-lts66
+          sudo chown -R nobody .
+          sudo -u nobody makepkg -s --noconfirm
+
+      - name: Upload compiled packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-lts66-${{ env.VERSION }}
+          path: linux-lts66/*.pkg.tar.zst
+
+      - name: Update last built version
+        run: |
+          echo "$VERSION" > last_built_version.txt
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add last_built_version.txt
+          git commit -m "Update last built version to $VERSION"
+          git push
+
