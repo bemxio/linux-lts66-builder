@@ -17,29 +17,30 @@ jobs:
           git clone https://aur.archlinux.org/linux-lts66.git
           git clone https://github.com/${{ github.repository }}.git
 
-      - name: Extract package version and check if version build exists
+      - name: Export current and last built version
         run: |
           CURRENT_VERSION=$(grep '^pkgver=' linux-lts66/PKGBUILD | cut -d'=' -f2)
 
           if [[ -f linux-lts66-builder/last_built_version.txt ]]; then
             LAST_BUILT_VERSION=$(cat linux-lts66-builder/last_built_version.txt)
+          else
+            LAST_BUILT_VERSION=''
           fi
 
-          echo $CURRENT_VERSION
-          echo $LAST_BUILT_VERSION
-
-          if [[ "$CURRENT_VERSION" == "$LAST_BUILT_VERSION" ]]; then
-            exit 0
-          fi
+          echo "Current version: $CURRENT_VERSION"
+          echo "Last built version: $LAST_BUILT_VERSION"
 
           echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+          echo "LAST_BUILT_VERSION=$LAST_BUILT_VERSION" >> $GITHUB_ENV
 
       - name: Create dedicated user for building
+        if: ${{ env.CURRENT_VERSION != env.LAST_BUILT_VERSION }}
         run: |
           useradd -m builder
           echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
 
       - name: Build the kernel
+        if: ${{ env.CURRENT_VERSION != env.LAST_BUILT_VERSION }}
         run: |
           cd linux-lts66
 
@@ -50,15 +51,17 @@ jobs:
           sudo -u builder MAKEFLAGS="-j$(nproc)" makepkg -s --noconfirm
 
       - name: Upload compiled packages
+        if: ${{ env.CURRENT_VERSION != env.LAST_BUILT_VERSION }}
         uses: actions/upload-artifact@v4
         with:
           name: linux-lts66-${{ env.CURRENT_VERSION }}
           path: linux-lts66/*.pkg.tar.zst
 
       - name: Update last built version
+        if: ${{ env.CURRENT_VERSION != env.LAST_BUILT_VERSION }}
         run: |
           cd linux-lts66-builder
-          echo "$CURRENT_VERSION" > last_built_version.txt
+          echo $CURRENT_VERSION > last_built_version.txt
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
