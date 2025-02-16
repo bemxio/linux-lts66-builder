@@ -16,7 +16,7 @@ jobs:
 
       - name: Install dependencies and clone AUR package base
         run: |
-          pacman -Syu --noconfirm archlinux-keyring base-devel git
+          pacman -Syu --noconfirm base-devel git
           git clone https://aur.archlinux.org/linux-lts66.git
 
       - name: Extract package version
@@ -43,8 +43,8 @@ jobs:
         run: |
           cd linux-lts66
 
-          sudo -u builder gpg --keyserver hkps://keys.openpgp.org --receive-keys ABAF11C65A2970B130ABE3C479BE3E4300411886
-          sudo -u builder gpg --keyserver hkps://keys.openpgp.org --receive-keys 647F28654894E3BD457199BE38DBBDC86092693E
+          sudo -u builder gpg --search-keys torvalds@kernel.org
+          sudo -u builder gpg --search-keys gregkh@kernel.org
 
           sudo chown -R builder .
           sudo -u builder makepkg -s --noconfirm
