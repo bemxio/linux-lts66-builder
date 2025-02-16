@@ -43,8 +43,8 @@ jobs:
         run: |
           cd linux-lts66
 
-          sudo -u builder gpg --search-keys torvalds@kernel.org
-          sudo -u builder gpg --search-keys gregkh@kernel.org
+          sudo -u builder gpg --locate-keys torvalds@kernel.org
+          sudo -u builder gpg --locate-keys gregkh@kernel.org
 
           sudo chown -R builder .
           sudo -u builder makepkg -s --noconfirm
