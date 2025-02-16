@@ -11,6 +11,9 @@ jobs:
     container: archlinux:latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Install dependencies and clone AUR package base
         run: |
           pacman -Syu --noconfirm base-devel git
@@ -20,9 +23,6 @@ jobs:
         run: |
           cd linux-lts66
           echo "VERSION=$(grep '^pkgver=' PKGBUILD | cut -d'=' -f2)" >> $GITHUB_ENV
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: Check if version build exists
         run: |
@@ -36,8 +36,6 @@ jobs:
 
       - name: Build the kernel
         run: |
-          ls -a
-          pwd
           cd linux-lts66
           sudo chown -R nobody .
           sudo -u nobody makepkg -s --noconfirm
