@@ -35,13 +35,13 @@ jobs:
           echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
           echo "LAST_BUILT_VERSION=$LAST_BUILT_VERSION" >> $GITHUB_ENV
 
-      - name: Create dedicated user for building
+      - name: Create dedicated user for build
         if: ${{ env.CURRENT_VERSION != env.LAST_BUILT_VERSION }}
         run: |
           useradd -m builder
           echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
 
-      - name: Build the kernel
+      - name: Build kernel packages
         if: ${{ env.CURRENT_VERSION != env.LAST_BUILT_VERSION }}
         run: |
           cd linux-lts66
@@ -60,7 +60,7 @@ jobs:
           path: linux-lts66/*.pkg.tar.zst
 
       - name: Update last built version
-        #if: ${{ env.CURRENT_VERSION != env.LAST_BUILT_VERSION }}
+        if: ${{ env.CURRENT_VERSION != env.LAST_BUILT_VERSION }}
         run: |
           echo $CURRENT_VERSION > last_built_version.txt
 
