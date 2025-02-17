@@ -11,18 +11,17 @@ jobs:
     container: archlinux:latest
 
     steps:
-      - name: Install dependencies and clone repositories
+      - name: Install dependencies and clone main repository
         run: |
           pacman -Syu --noconfirm base-devel git
-          git clone https://aur.archlinux.org/linux-lts66.git
-          git clone https://github.com/${{ github.repository }}.git
+          git clone --recursive https://github.com/${{ github.repository }} .
 
       - name: Export current and last built version
         run: |
           CURRENT_VERSION=$(grep '^pkgver=' linux-lts66/PKGBUILD | cut -d'=' -f2)
 
-          if [[ -f linux-lts66-builder/last_built_version.txt ]]; then
-            LAST_BUILT_VERSION=$(cat linux-lts66-builder/last_built_version.txt)
+          if [[ -f last_built_version.txt ]]; then
+            LAST_BUILT_VERSION=$(cat last_built_version.txt)
           else
             LAST_BUILT_VERSION=''
           fi
@@ -58,9 +57,8 @@ jobs:
           path: linux-lts66/*.pkg.tar.zst
 
       - name: Update last built version
-        if: ${{ env.CURRENT_VERSION != env.LAST_BUILT_VERSION }}
+        #if: ${{ env.CURRENT_VERSION != env.LAST_BUILT_VERSION }}
         run: |
-          cd linux-lts66-builder
           echo $CURRENT_VERSION > last_built_version.txt
 
           git config user.name "github-actions[bot]"
