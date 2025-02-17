@@ -16,7 +16,7 @@ jobs:
           pacman -Syu --noconfirm base-devel git
 
           git config --global --add safe.directory $(pwd)
-          git clone --recursive https://github.com/${{ github.repository }} .
+          git clone --recursive https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} .
           git submodule update --remote
 
       - name: Export current and last built version
@@ -69,4 +69,4 @@ jobs:
 
           git add last_built_version.txt linux-lts66
           git commit -m "Update last built version to $CURRENT_VERSION"
-          git push | echo "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com"
+          git push
