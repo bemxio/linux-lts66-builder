@@ -14,6 +14,8 @@ jobs:
       - name: Install dependencies and clone main repository
         run: |
           pacman -Syu --noconfirm base-devel git
+
+          git config --global --add safe.directory $(pwd)
           git clone --recursive https://github.com/${{ github.repository }} .
           git submodule update --remote
 
