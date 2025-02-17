@@ -69,4 +69,4 @@ jobs:
 
           git add last_built_version.txt linux-lts66
           git commit -m "Update last built version to $CURRENT_VERSION"
-          git push
+          git push | echo "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com"
